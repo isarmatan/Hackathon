@@ -92,7 +92,7 @@ def handle_tcp_connection(server_ip, tcp_port, connection_id, file_size):
     """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
-            tcp_socket.settimeout(5)  # Set a 5-second timeout for the connection
+            tcp_socket.settimeout(10)  # Set a 10-second timeout for the connection
             tcp_socket.connect((server_ip, tcp_port))
             print(colorize(f"[TCP {connection_id}] Connected to {server_ip}:{tcp_port}", text_color=32))
 
@@ -117,6 +117,7 @@ def handle_tcp_connection(server_ip, tcp_port, connection_id, file_size):
         print(colorize(f"[TCP {connection_id}] Connection to {server_ip}:{tcp_port} timed out.", text_color=31))
     except Exception as e:
         print(colorize(f"[TCP {connection_id}] Error: {e}", text_color=31))
+
 # --- UDP Transfer ---
 
 def handle_udp_connection(server_ip, udp_port, connection_id, file_size):
@@ -131,7 +132,7 @@ def handle_udp_connection(server_ip, udp_port, connection_id, file_size):
     """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_socket:
-            udp_socket.settimeout(2)
+            udp_socket.settimeout(10)
 
             # Send the request message
             request_packet = struct.pack("!IbQ", MAGIC_COOKIE, MESSAGE_TYPE_REQUEST, file_size)
@@ -177,16 +178,16 @@ def main():
     """
     Main function to interact with the user and manage TCP/UDP transfers.
     """
-    try:
-        # Get user input
-        file_size = int(input(colorize("Enter the file size (in bytes): ", text_color=36)))
-        num_tcp_connections = int(input(colorize("Enter the number of TCP connections: ", text_color=36)))
-        num_udp_connections = int(input(colorize("Enter the number of UDP connections: ", text_color=36)))
-    except ValueError:
-        print(colorize("Invalid input! Please enter integers for the file size and connection counts.", text_color=31))
-        return
-
     while True:
+        try:
+            # Get user input
+            file_size = int(input(colorize("Enter the file size (in bytes): ", text_color=36)))
+            num_tcp_connections = int(input(colorize("Enter the number of TCP connections: ", text_color=36)))
+            num_udp_connections = int(input(colorize("Enter the number of UDP connections: ", text_color=36)))
+        except ValueError:
+            print(colorize("Invalid input! Please enter integers for the file size and connection counts.", text_color=31))
+            continue
+
         print(colorize("Sniffing for broadcast packets...", style=1, text_color=34))
         info = sniff_broadcast_packets(timeout=10)
         if info is None:
@@ -220,5 +221,5 @@ def main():
 
         print(colorize("All transfers complete. Listening for new offers...\n", style=1, text_color=34))
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
