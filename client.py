@@ -92,6 +92,7 @@ def handle_tcp_connection(server_ip, tcp_port, connection_id, file_size):
     """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
+            tcp_socket.settimeout(5)  # Set a 5-second timeout for the connection
             tcp_socket.connect((server_ip, tcp_port))
             print(colorize(f"[TCP {connection_id}] Connected to {server_ip}:{tcp_port}", text_color=32))
 
@@ -112,9 +113,10 @@ def handle_tcp_connection(server_ip, tcp_port, connection_id, file_size):
             duration = end_time - start_time
             speed = received_bytes * 8 / duration / 1e6  # Mbps
             print(colorize(f"[TCP {connection_id}] Transfer complete: {received_bytes} bytes in {duration:.2f}s ({speed:.2f} Mbps)", text_color=33))
+    except socket.timeout:
+        print(colorize(f"[TCP {connection_id}] Connection to {server_ip}:{tcp_port} timed out.", text_color=31))
     except Exception as e:
         print(colorize(f"[TCP {connection_id}] Error: {e}", text_color=31))
-
 # --- UDP Transfer ---
 
 def handle_udp_connection(server_ip, udp_port, connection_id, file_size):
